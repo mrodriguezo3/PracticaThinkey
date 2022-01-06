@@ -1,0 +1,19 @@
+##Crea la imagen
+
+docker build -t flask-devenv . 
+
+##Crea el container a partir de la imagen
+
+docker run -d -p 5000:5000 flask-devenv
+
+##Ver containers activos
+
+docker ps
+
+##Borrar container
+
+docker container rm <id> -f
+
+##Borrar la imagen
+
+docker image rm <name> 

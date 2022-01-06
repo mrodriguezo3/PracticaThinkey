@@ -1,0 +1,39 @@
+from flask import Flask, request
+from flask_restful import Resource, Api
+from flask_jwt import JWT, jwt_required
+
+from security import authenticate, identity
+
+server = Flask(__name__)
+server.secret_key = 'jose'
+api = Api(server)
+
+jwt = JWT(server, authenticate, identity)  #Crea un nuevo endpoint llamado /auth
+
+items = []
+
+class Item(Resource):
+    @jwt_required()
+    def get(self, name):  #Nombre del item
+        item = next(filter(lambda x: x['name'] == name, items), None)
+        return {'item': item}, 200 if item else 404
+    
+    def post(self, name):
+        if next(filter(lambda x: x['name'] == name, items), None) is not None:
+            return {'message': "Un item con el nombre '{}' ya existe.".format[name]}, 400
+        
+        data = request.get_json()
+        item = {'name': name, 'price': data['price']}
+        items.append(item)
+        return item, 201  #Item Creado exitosamente
+    
+class ItemList(Resource):
+    def get(self):
+        return {'items': items}
+    
+
+api.add_resource(Item, '/item/<string:name>')  
+api.add_resource(ItemList, '/items')
+
+
+server.run(port=5000)  #, debug=True, no funcionó
